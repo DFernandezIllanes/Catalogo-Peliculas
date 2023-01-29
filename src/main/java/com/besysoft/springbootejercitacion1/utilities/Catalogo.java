@@ -10,60 +10,11 @@ import java.util.*;
 
 public class Catalogo {
 
-    private List<Genero> generos;
-    private List<Pelicula> peliculas;
-    private List<Personaje> personajes;
+    private static List<Genero> generos = new ArrayList<>();
+    private static List<Pelicula> peliculas = new ArrayList<>();
+    private static List<Personaje> personajes = new ArrayList<>();
 
-    public Catalogo() {
-        this.generos = new ArrayList<>();
-        this.peliculas = new ArrayList<>();
-        this.personajes = new ArrayList<>();
-        this.cargarDatos();
-    }
-
-    public List<Genero> getGeneros() {
-        return generos;
-    }
-
-    public void setGeneros(List<Genero> generos) {
-        this.generos = generos;
-    }
-
-    public void addGenero(Genero genero) {
-
-        if(this.generos.contains(genero)) {
-            System.out.println("El genero ya esta agregado a la lista de generos del catalogo");
-        } else {
-            this.generos.add(genero);
-        }
-    }
-
-    public List<Pelicula> getPeliculas() {
-        return peliculas;
-    }
-
-    public void setPeliculas(List<Pelicula> peliculas) {
-        this.peliculas = peliculas;
-    }
-
-    public void addPelicula(Pelicula pelicula) {
-        this.peliculas.add(pelicula);
-    }
-
-    public List<Personaje> getPersonajes() {
-        return personajes;
-    }
-
-    public void setPersonajes(List<Personaje> personajes) {
-        this.personajes = personajes;
-    }
-
-    public void addPersonaje(Personaje personaje) {
-        this.personajes.add(personaje);
-    }
-
-    public void cargarDatos() {
-
+    static {
         //---------------------------- Creacion de Generos ---------------------------------------------
         Genero cienciaFiccion = new Genero(1L, "Ciencia ficcion");
 
@@ -137,28 +88,73 @@ public class Catalogo {
         cienciaFiccion.addPelicula(starWars5);
         cienciaFiccion.addPelicula(starWars6);
 
-        this.generos.add(cienciaFiccion);
-        this.generos.add(animacion);
+        generos.add(cienciaFiccion);
+        generos.add(animacion);
 
-        this.peliculas.add(elReyLeon);
-        this.peliculas.add(unlimitedBladeWorks);
-        this.peliculas.add(elPoderInvencible);
-        this.peliculas.add(starWars4);
-        this.peliculas.add(starWars5);
-        this.peliculas.add(starWars6);
+        peliculas.add(elReyLeon);
+        peliculas.add(unlimitedBladeWorks);
+        peliculas.add(elPoderInvencible);
+        peliculas.add(starWars4);
+        peliculas.add(starWars5);
+        peliculas.add(starWars6);
 
-        this.personajes.add(saber);
-        this.personajes.add(mufasa);
-        this.personajes.add(broly);
-        this.personajes.add(lukeSkywalker);
-        this.personajes.add(leiaOrgana);
+        personajes.add(saber);
+        personajes.add(mufasa);
+        personajes.add(broly);
+        personajes.add(lukeSkywalker);
+        personajes.add(leiaOrgana);
     }
 
-    public List<Personaje> buscarPersonajesPorFiltro(String filtro) {
+    public static List<Genero> getGeneros() {
+        return generos;
+    }
+
+    public static void setGeneros(List<Genero> generos) {
+        generos = generos;
+    }
+
+    public static void addGenero(Genero genero) {
+
+        if(generos.contains(genero)) {
+            System.out.println("El genero ya esta agregado a la lista de generos del catalogo");
+        } else {
+            generos.add(genero);
+        }
+    }
+
+    public static List<Pelicula> getPeliculas() {
+        return peliculas;
+    }
+
+    public static void setPeliculas(List<Pelicula> peliculas) {
+        Catalogo.peliculas = peliculas;
+    }
+
+    public static void addPelicula(Pelicula pelicula) {
+        peliculas.add(pelicula);
+    }
+
+    public static List<Personaje> getPersonajes() {
+        return personajes;
+    }
+
+    public static void setPersonajes(List<Personaje> personajes) {
+        Catalogo.personajes = personajes;
+    }
+
+    public static void addPersonaje(Personaje personaje) {
+        personajes.add(personaje);
+    }
+
+
+    public static List<Personaje> buscarPersonajesPorFiltro(String filtro) {
         List<Personaje> listaDePersonajesFiltrados = new ArrayList<>();
 
-        for(Personaje personaje : this.personajes) {
-            // Si el valor del filtro es un numero, comparo por edad. Si el filtro no coincide con un valor numerico, comparo por nombre
+        for(Personaje personaje : personajes) {
+            /*
+            Si el valor del filtro es un numero, comparo por edad.
+            Si el filtro no coincide con un valor numerico, comparo por nombre
+             */
             if(filtro.matches("[0-9]+") && personaje.getEdad().toString().equals(filtro) ||
             !filtro.matches("[0-9]+") && personaje.getNombre().toLowerCase().contains(filtro.toLowerCase())) {
                 //personaje.getNombre().equalsIgnoreCase(filtro)
@@ -167,51 +163,34 @@ public class Catalogo {
             }
         }
 
-        /* Reemplazado por el codigo de arriba
-
-        if(filtro.matches("[0-9]+")) {
-            for(Personaje personaje : this.personajes) {
-                if(personaje.getEdad().toString().equals(filtro)) {
-                    listaDePersonajesFiltrados.add(personaje);
-                }
-            }
-        } else {
-            for(Personaje personaje : this.personajes) {
-                if(personaje.getNombre().equalsIgnoreCase(filtro)) {
-                    listaDePersonajesFiltrados.add(personaje);
-                }
-            }
-        }
-         */
-
         return listaDePersonajesFiltrados;
     }
 
-    public List<Pelicula> buscarPeliculasPorFiltro(String filtro) {
+    public static List<Pelicula> buscarPeliculasPorFiltro(String filtro) {
         List<Pelicula> listaDePeliculasFiltradas = new ArrayList<>();
         int index = -1;
 
         // Compruebo si filtro coincide con alguno de los nombres de la lista de generos
-        for(int i=0; i<this.generos.size() && index<0; i++) {
-            if(this.generos.get(i).getNombre().equalsIgnoreCase(filtro)) {
+        for(int i=0; i < generos.size() && index<0; i++) {
+            if(generos.get(i).getNombre().equalsIgnoreCase(filtro)) {
                 index = i;
             }
         }
 
-        // filtro coincide con el nombre de alguno de los generos
+        // el filtro coincide con el nombre de alguno de los generos
         if(index >= 0) {
-            for(Pelicula pelicula : this.generos.get(index).getPeliculas()) {
+            for(Pelicula pelicula : generos.get(index).getPeliculas()) {
                 listaDePeliculasFiltradas.add(pelicula);
             }
         } else {
             // Compruebo si filtro coincide con alguno de los titulos de la lista de peliculas
-            for(int i = 0; i < this.peliculas.size() && index < 0; i++) {
+            for(int i = 0; i < peliculas.size() && index < 0; i++) {
                 /* Condicion anterior del if de abajo
                 this.peliculas.get(i).getTitulo().equalsIgnoreCase(filtro)
                  */
-                if(this.peliculas.get(i).getTitulo().toLowerCase().contains(filtro.toLowerCase())) {
+                if(peliculas.get(i).getTitulo().toLowerCase().contains(filtro.toLowerCase())) {
                     index = i;
-                    listaDePeliculasFiltradas.add(this.peliculas.get(i));
+                    listaDePeliculasFiltradas.add(peliculas.get(i));
                 }
             }
         }

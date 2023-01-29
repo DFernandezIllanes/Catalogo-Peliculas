@@ -1,6 +1,7 @@
 package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
+import com.besysoft.springbootejercitacion1.utilities.Catalogo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,29 +15,45 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/personajes")
-public class PersonajeController extends Controller{
+public class PersonajeController{
 
     //------------------------------------ METODOS GET --------------------------------------------------
 
+    /**
+     * Devuelve todos los personajes
+     * @return
+     */
     @GetMapping()
     public List<Personaje> getPersonajes() {
-        return catalogo.getPersonajes();
+        return Catalogo.getPersonajes();
     }
 
+    /**
+     * Devuelve una lista de personajes que coincidan con el argumento pasado como filtro. Si el argumento pasado es un numero,
+     * devuelve todos los personajes cuya edad coincidan con dicho numero. Si el argumento no es un numero, devuelve todos los
+     * personajes cuyo nombre contengan el valor del argumento. Si no hay coincidencias, devuelve una lista vacia
+     * @param filtro
+     * @return
+     */
     @GetMapping(path = "/{filtro}")
     public List<Personaje> getPersonajesPorFiltro(@PathVariable String filtro) {
 
-        return catalogo.buscarPersonajesPorFiltro(filtro);
+        return Catalogo.buscarPersonajesPorFiltro(filtro);
     }
 
-    //GET /personajes/edad?desde=N&hasta=X
+    /**
+     * Devuelve todos los personajes cuya edad se encuentren dentro del intervalo indicado por los parametros
+     * @param desde
+     * @param hasta
+     * @return
+     */
     @GetMapping("/edad")
     public ResponseEntity<?> getPersonajesEntreEdades(@RequestParam(name = "desde", required = true) Integer desde,
                                                       @RequestParam(name = "hasta", required = true) Integer hasta) {
 
         Map<String, Object> mensajeBody = new HashMap<>();
 
-        Optional<Personaje> oPersonaje = catalogo.getPersonajes().stream().
+        Optional<Personaje> oPersonaje = Catalogo.getPersonajes().stream().
                 filter(p -> p.getEdad() >= desde && p.getEdad() <= hasta).
                 findAny();
 
@@ -46,7 +63,8 @@ public class PersonajeController extends Controller{
                     format("No existe un personaje cuya edad sea mayor que %s", desde, " y menor que %s", hasta));
         }
 
-        List<Personaje> personajes = catalogo.getPersonajes().stream().
+        List<Personaje> personajes = Catalogo.
+                getPersonajes().stream().
                 filter(p -> p.getEdad() >= desde && p.getEdad() <= hasta).
                 collect(Collectors.toList());
 
@@ -57,6 +75,12 @@ public class PersonajeController extends Controller{
     }
 
     //------------------------------------ METODOS POST --------------------------------------------------
+
+    /**
+     * Agrega un personaje a la coleccion de personajes
+     * @param personaje
+     * @return
+     */
     @PostMapping()
     public ResponseEntity<?> createPersonaje(@RequestBody Personaje personaje) {
 
@@ -64,8 +88,8 @@ public class PersonajeController extends Controller{
         HttpHeaders headers = new HttpHeaders();
         headers.set("app-info", "nombre@dominio.com");
 
-        personaje.setId(catalogo.getPersonajes().size()+1l);
-        catalogo.addPersonaje(personaje);
+        personaje.setId(Catalogo.getPersonajes().size()+1l);
+        Catalogo.addPersonaje(personaje);
 
         mensajeBody.put("success", Boolean.TRUE);
         mensajeBody.put("mensaje",
@@ -75,6 +99,13 @@ public class PersonajeController extends Controller{
     }
 
     //------------------------------------ METODOS PUT --------------------------------------------------
+
+    /**
+     * Actualiza los datos del personaje que coincida con el ID pasado
+     * @param id
+     * @param personaje
+     * @return
+     */
     @PutMapping(path = "/{id}")
     public ResponseEntity<?> updatePersonaje(@PathVariable(name = "id", required = true) Long id,
                                              @RequestBody Personaje personaje) {
@@ -83,7 +114,7 @@ public class PersonajeController extends Controller{
         HttpHeaders headers = new HttpHeaders();
         headers.set("app-info", "nombre@dominio.com");
 
-        Optional<Personaje> oPersonaje = catalogo.getPersonajes().stream().filter(p -> p.getId() == id).findFirst();
+        Optional<Personaje> oPersonaje = Catalogo.getPersonajes().stream().filter(p -> p.getId() == id).findFirst();
 
         if(!oPersonaje.isPresent()) {
             mensajeBody.put("success", Boolean.FALSE);
@@ -94,7 +125,7 @@ public class PersonajeController extends Controller{
         }
 
         personaje.setId(id);
-        catalogo.getPersonajes().set(id.intValue()-1, personaje);
+        Catalogo.getPersonajes().set(id.intValue()-1, personaje);
 
         mensajeBody.put("success", Boolean.TRUE);
         mensajeBody.put("mensaje", personaje);

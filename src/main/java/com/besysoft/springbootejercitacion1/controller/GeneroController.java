@@ -1,6 +1,7 @@
 package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Genero;
+import com.besysoft.springbootejercitacion1.utilities.Catalogo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +13,27 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/generos")
-public class GeneroController extends Controller{
+public class GeneroController{
 
     //------------------------------------------ METODOS GET ----------------------------------------
+
+    /**
+     * Devuelve todos los generos
+     * @return
+     */
     @GetMapping()
     public ResponseEntity<?> getGeneros() {
-        return ResponseEntity.ok(catalogo.getGeneros());
+
+        return ResponseEntity.ok(Catalogo.getGeneros());
     }
 
     //------------------------------------------ METODOS POST ----------------------------------------
+
+    /**
+     * Agrega un genero a la coleccion de generos
+     * @param genero
+     * @return
+     */
     @PostMapping()
     public ResponseEntity<?> createGenero(@RequestBody Genero genero) {
 
@@ -28,9 +41,9 @@ public class GeneroController extends Controller{
         HttpHeaders headers = new HttpHeaders();
         headers.set("app-info", "nombre@dominio.com");
 
-        genero.setId(catalogo.getGeneros().size()+1l);
+        genero.setId(Catalogo.getGeneros().size()+1l);
 
-        catalogo.addGenero(genero);
+        Catalogo.addGenero(genero);
 
         mensajeBody.put("success", Boolean.TRUE);
         mensajeBody.put("mensaje",
@@ -40,6 +53,13 @@ public class GeneroController extends Controller{
     }
 
     //------------------------------------------ METODOS PUT ----------------------------------------
+
+    /**
+     * Actualiza los datos del genero que coincida con el ID indicado
+     * @param id
+     * @param genero
+     * @return
+     */
     @PutMapping(path = "/{id}")
     public ResponseEntity<?> updateGenero(@PathVariable(name = "id", required = true) Long id,
                                           @RequestBody Genero genero) {
@@ -48,7 +68,7 @@ public class GeneroController extends Controller{
         HttpHeaders headers = new HttpHeaders();
         headers.set("app-info", "nombre@dominio.com");
 
-        Optional<Genero> oGenero = catalogo.getGeneros().stream().filter(g -> g.getId() == id).findFirst();
+        Optional<Genero> oGenero = Catalogo.getGeneros().stream().filter(g -> g.getId() == id).findFirst();
 
         if(!oGenero.isPresent()) {
             mensajeBody.put("success", Boolean.FALSE);
@@ -62,7 +82,7 @@ public class GeneroController extends Controller{
         }
 
         genero.setId(id);
-        catalogo.getGeneros().set(id.intValue()-1, genero);
+        Catalogo.getGeneros().set(id.intValue()-1, genero);
 
         mensajeBody.put("success", Boolean.TRUE);
         mensajeBody.put("mensaje", genero);

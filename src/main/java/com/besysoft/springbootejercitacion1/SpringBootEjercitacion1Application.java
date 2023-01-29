@@ -1,5 +1,6 @@
 package com.besysoft.springbootejercitacion1;
 
+import com.besysoft.springbootejercitacion1.utilities.Catalogo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
