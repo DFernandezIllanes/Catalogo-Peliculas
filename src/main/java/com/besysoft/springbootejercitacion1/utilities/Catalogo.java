@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Deprecated
 public class Catalogo {
 
     private static List<Genero> generos = new ArrayList<>();

@@ -1,7 +1,9 @@
 package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
+import com.besysoft.springbootejercitacion1.services.interfaces.PersonajeService;
 import com.besysoft.springbootejercitacion1.utilities.Catalogo;
+import com.besysoft.springbootejercitacion1.utilities.Respuesta;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/personajes")
 public class PersonajeController{
 
+    private final PersonajeService service;
+
+    public PersonajeController(PersonajeService service) {
+        this.service = service;
+    }
+
     //------------------------------------ METODOS GET --------------------------------------------------
 
     /**
@@ -24,8 +32,8 @@ public class PersonajeController{
      * @return
      */
     @GetMapping()
-    public List<Personaje> getPersonajes() {
-        return Catalogo.getPersonajes();
+    public ResponseEntity<?> getPersonajes() {
+        return Respuesta.generar(Boolean.TRUE, this.service.obtenerTodos());
     }
 
     /**
@@ -36,9 +44,8 @@ public class PersonajeController{
      * @return
      */
     @GetMapping(path = "/{filtro}")
-    public List<Personaje> getPersonajesPorFiltro(@PathVariable String filtro) {
-
-        return Catalogo.buscarPersonajesPorFiltro(filtro);
+    public ResponseEntity<?> getPersonajesPorFiltro(@PathVariable String filtro) {
+        return Respuesta.generar(Boolean.TRUE, this.service.obtenerPersonajesPorFiltro(filtro));
     }
 
     /**
@@ -51,27 +58,7 @@ public class PersonajeController{
     public ResponseEntity<?> getPersonajesEntreEdades(@RequestParam(name = "desde", required = true) Integer desde,
                                                       @RequestParam(name = "hasta", required = true) Integer hasta) {
 
-        Map<String, Object> mensajeBody = new HashMap<>();
-
-        Optional<Personaje> oPersonaje = Catalogo.getPersonajes().stream().
-                filter(p -> p.getEdad() >= desde && p.getEdad() <= hasta).
-                findAny();
-
-        if(!oPersonaje.isPresent()) {
-            mensajeBody.put("success", Boolean.FALSE);
-            mensajeBody.put("mensaje", String.
-                    format("No existe un personaje cuya edad sea mayor que %s", desde, " y menor que %s", hasta));
-        }
-
-        List<Personaje> personajes = Catalogo.
-                getPersonajes().stream().
-                filter(p -> p.getEdad() >= desde && p.getEdad() <= hasta).
-                collect(Collectors.toList());
-
-        mensajeBody.put("success", Boolean.TRUE);
-        mensajeBody.put("mensaje", personajes);
-
-        return ResponseEntity.ok(mensajeBody);
+        return Respuesta.generar(Boolean.TRUE, this.service.obtenerPersonajesDesdeEdadHastaEdad(desde, hasta));
     }
 
     //------------------------------------ METODOS POST --------------------------------------------------
@@ -84,18 +71,22 @@ public class PersonajeController{
     @PostMapping()
     public ResponseEntity<?> createPersonaje(@RequestBody Personaje personaje) {
 
-        Map<String, Object> mensajeBody = new HashMap<>();
+        /*Map<String, Object> mensajeBody = new HashMap<>();
         HttpHeaders headers = new HttpHeaders();
         headers.set("app-info", "nombre@dominio.com");
 
-        personaje.setId(Catalogo.getPersonajes().size()+1l);
-        Catalogo.addPersonaje(personaje);
-
         mensajeBody.put("success", Boolean.TRUE);
         mensajeBody.put("mensaje",
-                String.format("Id: %d", personaje.getId()));
+                String.format("Id: %d", this.service.createPersonaje(personaje).getId()));
 
-        return new ResponseEntity<Map<String, Object>>(mensajeBody, headers, HttpStatus.CREATED);
+        return new ResponseEntity<Map<String, Object>>(mensajeBody, headers, HttpStatus.CREATED);*/
+        Personaje personaje1 = this.service.createPersonaje(personaje);
+
+        if(personaje1 == null) {
+            return Respuesta.generar(Boolean.FALSE, "No se pudo crear el personaje");
+        }
+
+        return Respuesta.generar(HttpStatus.CREATED, Boolean.TRUE, String.format("Id: %d", personaje1.getId()));
     }
 
     //------------------------------------ METODOS PUT --------------------------------------------------
@@ -110,27 +101,13 @@ public class PersonajeController{
     public ResponseEntity<?> updatePersonaje(@PathVariable(name = "id", required = true) Long id,
                                              @RequestBody Personaje personaje) {
 
-        Map<String, Object> mensajeBody = new HashMap<>();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("app-info", "nombre@dominio.com");
+        Personaje personaje1 = this.service.updatePersonaje(id, personaje);
 
-        Optional<Personaje> oPersonaje = Catalogo.getPersonajes().stream().filter(p -> p.getId() == id).findFirst();
-
-        if(!oPersonaje.isPresent()) {
-            mensajeBody.put("success", Boolean.FALSE);
-            mensajeBody.put("mensaje",
-                    String.format("No existe un personaje con el id %d", personaje.getId()));
-
-            return ResponseEntity.badRequest().body(mensajeBody);
+        if(personaje1 == null) {
+            return Respuesta.generar(Boolean.FALSE, "No se pudo actualizar los datos del personaje");
         }
 
-        personaje.setId(id);
-        Catalogo.getPersonajes().set(id.intValue()-1, personaje);
-
-        mensajeBody.put("success", Boolean.TRUE);
-        mensajeBody.put("mensaje", personaje);
-
-        return new ResponseEntity<Map<String, Object>>(mensajeBody, headers, HttpStatus.ACCEPTED);
+        return Respuesta.generar(HttpStatus.ACCEPTED, Boolean.TRUE, personaje1);
     }
 
 }
