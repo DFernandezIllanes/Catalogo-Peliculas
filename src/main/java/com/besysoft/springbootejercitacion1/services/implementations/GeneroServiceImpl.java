@@ -2,13 +2,15 @@ package com.besysoft.springbootejercitacion1.services.implementations;
 
 import com.besysoft.springbootejercitacion1.dominio.Genero;
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
-import com.besysoft.springbootejercitacion1.repositories.GeneroRepository;
+import com.besysoft.springbootejercitacion1.repositories.memory.GeneroRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.GeneroService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@ConditionalOnProperty(prefix = "app", name = "type-bean", havingValue = "memory")
 public class GeneroServiceImpl implements GeneroService {
 
     private final GeneroRepository repository;

@@ -1,29 +1,21 @@
 package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Genero;
-import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import com.besysoft.springbootejercitacion1.services.interfaces.GeneroService;
-import com.besysoft.springbootejercitacion1.services.interfaces.PeliculaService;
-import com.besysoft.springbootejercitacion1.utilities.Respuesta;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/generos")
 public class GeneroController{
 
-    private final GeneroService service;
-    private final PeliculaService peliculaService;
+    private final GeneroService generoService;
 
-    public GeneroController(GeneroService service, PeliculaService peliculaService) {
-        this.service = service;
-        this.peliculaService = peliculaService;
+    public GeneroController(GeneroService generoService) {
+        this.generoService = generoService;
     }
 
     //------------------------------------------ METODOS GET ----------------------------------------
@@ -34,9 +26,7 @@ public class GeneroController{
      */
     @GetMapping()
     public ResponseEntity<?> getGeneros() {
-
-        return Respuesta.generar(Boolean.TRUE, this.service.obtenerTodos());
-        //return ResponseEntity.ok(this.service.obtenerTodos());
+        return ResponseEntity.ok(this.generoService.obtenerTodos());
     }
 
     //------------------------------------------ METODOS POST ----------------------------------------
@@ -49,32 +39,17 @@ public class GeneroController{
     @PostMapping()
     public ResponseEntity<?> createGenero(@RequestBody Genero genero) {
 
-        Genero nuevoGenero = this.service.createGenero(genero);
-        if(nuevoGenero == null) {
-            return Respuesta.generar(Boolean.FALSE, "Ya existe un genero con ese nombre");
+        if(genero.getNombre() == null) {
+            return ResponseEntity.badRequest().body("El genero debe tener nombre");
         }
 
-        return Respuesta.generar(Boolean.TRUE, nuevoGenero);
+        Optional<Genero> optionalGenero = this.generoService.buscarPorNombre(genero.getNombre());
+        if(optionalGenero.isPresent()) {
+            return new ResponseEntity<>("Ya existe un genero con el mismo nombre", HttpStatus.CONFLICT);
+        }
+
+        return ResponseEntity.ok(this.generoService.createGenero(genero));
     }
-
-    /*@PostMapping(path = "/{id}")
-    public ResponseEntity<?> agregarPelicula(@PathVariable(name = "id") Long id,
-                                             @RequestBody Pelicula pelicula) {
-
-        //TODO comprobar validaciones y ubicacion de las mismas
-        if(pelicula.getId() != null ) {
-            Optional<Pelicula> optionalPelicula = this.peliculaService.buscarPorId(pelicula.getId());
-            if(!optionalPelicula.isPresent()) {
-                return ResponseEntity.badRequest().body("No existe la pelicula");
-            } else {
-                Pelicula pelicula1 = optionalPelicula.get();
-
-                return ResponseEntity.ok(this.service.agregarPelicula(id, pelicula1));
-            }
-        } else {
-            return ResponseEntity.badRequest().body("La pelicula debe tener un ID");
-        }
-    }*/
 
     //------------------------------------------ METODOS PUT ----------------------------------------
 
@@ -88,12 +63,11 @@ public class GeneroController{
     public ResponseEntity<?> updateGenero(@PathVariable(name = "id", required = true) Long id,
                                           @RequestBody Genero genero) {
 
-        Optional<Genero> oGenero = this.service.buscarPorId(id);
+        Optional<Genero> oGenero = this.generoService.buscarPorId(id);
 
         if(!oGenero.isPresent()) {
-            return Respuesta.generar(Boolean.FALSE, String.format("No existe un genero con el id %d", id));
+            return ResponseEntity.badRequest().body(String.format("No existe un genero con el id %d", id));
         }
-
-        return Respuesta.generar(Boolean.TRUE, this.service.updateGenero(id, genero));
+        return ResponseEntity.ok(this.generoService.updateGenero(id, genero));
     }
 }

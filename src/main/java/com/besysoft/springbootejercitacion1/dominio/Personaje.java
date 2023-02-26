@@ -5,19 +5,28 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Entity
+@Table(name = "personajes")
 public class Personaje {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "nombre", nullable = false)
     private String nombre;
+    @Column(name = "edad")
     private Integer edad;
+    @Column(name = "peso")
     private Double peso;
+    @Column(name = "historia")
     private String historia;
 
+    @ManyToMany(mappedBy = "personajes", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("personajes") // Anotacion usada para evitar la recursion infinita
     private List<Pelicula> peliculas = new ArrayList<>();
 

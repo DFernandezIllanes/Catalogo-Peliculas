@@ -2,27 +2,17 @@ package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
 import com.besysoft.springbootejercitacion1.services.interfaces.PersonajeService;
-import com.besysoft.springbootejercitacion1.utilities.Catalogo;
-import com.besysoft.springbootejercitacion1.utilities.Respuesta;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/personajes")
 public class PersonajeController{
 
-    private final PersonajeService service;
+    private final PersonajeService personajeService;
 
-    public PersonajeController(PersonajeService service) {
-        this.service = service;
+    public PersonajeController(PersonajeService personajeService) {
+        this.personajeService = personajeService;
     }
 
     //------------------------------------ METODOS GET --------------------------------------------------
@@ -33,7 +23,7 @@ public class PersonajeController{
      */
     @GetMapping()
     public ResponseEntity<?> getPersonajes() {
-        return Respuesta.generar(Boolean.TRUE, this.service.obtenerTodos());
+        return ResponseEntity.ok(this.personajeService.obtenerTodos());
     }
 
     /**
@@ -45,7 +35,7 @@ public class PersonajeController{
      */
     @GetMapping(path = "/{filtro}")
     public ResponseEntity<?> getPersonajesPorFiltro(@PathVariable String filtro) {
-        return Respuesta.generar(Boolean.TRUE, this.service.obtenerPersonajesPorFiltro(filtro));
+        return ResponseEntity.ok(this.personajeService.obtenerPersonajesPorFiltro(filtro));
     }
 
     /**
@@ -57,8 +47,7 @@ public class PersonajeController{
     @GetMapping("/edad")
     public ResponseEntity<?> getPersonajesEntreEdades(@RequestParam(name = "desde", required = true) Integer desde,
                                                       @RequestParam(name = "hasta", required = true) Integer hasta) {
-
-        return Respuesta.generar(Boolean.TRUE, this.service.obtenerPersonajesDesdeEdadHastaEdad(desde, hasta));
+        return ResponseEntity.ok(this.personajeService.obtenerPersonajesDesdeEdadHastaEdad(desde, hasta));
     }
 
     //------------------------------------ METODOS POST --------------------------------------------------
@@ -71,22 +60,11 @@ public class PersonajeController{
     @PostMapping()
     public ResponseEntity<?> createPersonaje(@RequestBody Personaje personaje) {
 
-        /*Map<String, Object> mensajeBody = new HashMap<>();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("app-info", "nombre@dominio.com");
-
-        mensajeBody.put("success", Boolean.TRUE);
-        mensajeBody.put("mensaje",
-                String.format("Id: %d", this.service.createPersonaje(personaje).getId()));
-
-        return new ResponseEntity<Map<String, Object>>(mensajeBody, headers, HttpStatus.CREATED);*/
-        Personaje personaje1 = this.service.createPersonaje(personaje);
-
-        if(personaje1 == null) {
-            return Respuesta.generar(Boolean.FALSE, "No se pudo crear el personaje");
+        if(personaje.getNombre() == null) {
+            return ResponseEntity.badRequest().body("El personaje debe tener un nombre");
         }
 
-        return Respuesta.generar(HttpStatus.CREATED, Boolean.TRUE, String.format("Id: %d", personaje1.getId()));
+        return ResponseEntity.ok(this.personajeService.createPersonaje(personaje));
     }
 
     //------------------------------------ METODOS PUT --------------------------------------------------
@@ -101,13 +79,11 @@ public class PersonajeController{
     public ResponseEntity<?> updatePersonaje(@PathVariable(name = "id", required = true) Long id,
                                              @RequestBody Personaje personaje) {
 
-        Personaje personaje1 = this.service.updatePersonaje(id, personaje);
-
-        if(personaje1 == null) {
-            return Respuesta.generar(Boolean.FALSE, "No se pudo actualizar los datos del personaje");
+        if(personaje.getNombre() == null) {
+            return ResponseEntity.badRequest().body("El personaje debe tener nombre");
         }
 
-        return Respuesta.generar(HttpStatus.ACCEPTED, Boolean.TRUE, personaje1);
+        return ResponseEntity.ok(this.personajeService.updatePersonaje(id, personaje));
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class Respuesta{
 
     private static Map<String, Object> mensajeBody = new HashMap<>();

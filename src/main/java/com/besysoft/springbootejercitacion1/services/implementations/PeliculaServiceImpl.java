@@ -1,17 +1,17 @@
 package com.besysoft.springbootejercitacion1.services.implementations;
 
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
-import com.besysoft.springbootejercitacion1.repositories.GeneroRepository;
-import com.besysoft.springbootejercitacion1.repositories.PeliculaRepository;
+import com.besysoft.springbootejercitacion1.repositories.memory.GeneroRepository;
+import com.besysoft.springbootejercitacion1.repositories.memory.PeliculaRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.PeliculaService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Service
+@ConditionalOnProperty(prefix = "app", name = "type-bean", havingValue = "memory")
 public class PeliculaServiceImpl implements PeliculaService {
 
     private final PeliculaRepository repository;

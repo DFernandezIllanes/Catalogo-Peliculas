@@ -2,6 +2,7 @@ package com.besysoft.springbootejercitacion1.dominio;
 
 import com.fasterxml.jackson.annotation.*;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -9,13 +10,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Entity
+@Table(name = "peliculas")
 public class Pelicula {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "titulo", nullable = false)
     private String titulo;
+    @Column(name = "fecha_de_creacion")
     private LocalDate fechaDeCreacion;
+    @Column(name = "calificacion")
     private Integer calificacion;
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "apariciones",
+            joinColumns = @JoinColumn(name = "pelicula_id"),
+            inverseJoinColumns = @JoinColumn(name = "personaje_id")
+    )
     @JsonIgnoreProperties("peliculas") // Anotacion usada para evitar la recursion infinita
     private List<Personaje> personajes = new ArrayList<>();
 

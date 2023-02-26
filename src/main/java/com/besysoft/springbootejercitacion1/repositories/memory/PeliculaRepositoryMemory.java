@@ -1,4 +1,4 @@
-package com.besysoft.springbootejercitacion1.repositories;
+package com.besysoft.springbootejercitacion1.repositories.memory;
 
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import com.besysoft.springbootejercitacion1.dominio.Personaje;

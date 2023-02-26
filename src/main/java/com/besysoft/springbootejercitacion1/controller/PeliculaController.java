@@ -5,7 +5,6 @@ import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import com.besysoft.springbootejercitacion1.services.interfaces.GeneroService;
 import com.besysoft.springbootejercitacion1.services.interfaces.PeliculaService;
 import com.besysoft.springbootejercitacion1.utilities.Respuesta;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +17,11 @@ import java.util.*;
 @RequestMapping("/peliculas")
 public class PeliculaController{
 
-    private final PeliculaService service;
+    private final PeliculaService peliculaService;
     private final GeneroService generoService;
 
-    public PeliculaController(PeliculaService service, GeneroService generoService) {
-        this.service = service;
+    public PeliculaController(PeliculaService peliculaService, GeneroService generoService) {
+        this.peliculaService = peliculaService;
         this.generoService = generoService;
     }
 
@@ -34,7 +33,7 @@ public class PeliculaController{
      */
     @GetMapping()
     public ResponseEntity<?> obtenerPeliculas() {
-        return Respuesta.generar(Boolean.TRUE, this.service.obtenerTodos());
+        return ResponseEntity.ok(this.peliculaService.obtenerTodos());
     }
 
     /**
@@ -46,19 +45,18 @@ public class PeliculaController{
      */
     @GetMapping(path = "/{filtro}")
     public ResponseEntity<?> getPeliculasPorFiltro(@PathVariable String filtro) {
-        Optional<Pelicula> oPelicula = this.service.buscarPorTitulo(filtro);
+        Optional<Pelicula> oPelicula = this.peliculaService.buscarPorTitulo(filtro);
 
         if(oPelicula.isPresent()) {
-            return Respuesta.generar(Boolean.TRUE, Arrays.asList(oPelicula.get()));
+            return ResponseEntity.ok(oPelicula.get());
         }
 
         Optional<Genero> oGenero = this.generoService.buscarPorNombre(filtro);
 
         if(oGenero.isPresent()) {
-            return Respuesta.generar(Boolean.TRUE, oGenero.get().getPeliculas());
+            return ResponseEntity.ok(oGenero.get().getPeliculas());
         }
-
-        return Respuesta.generar(Boolean.FALSE, "No existe ningun genero o pelicula que coincida con el filtro indicado");
+        return ResponseEntity.badRequest().body("Ninguna pelicula o genero coinciden con el valor del filtro");
     }
 
     /**
@@ -76,12 +74,7 @@ public class PeliculaController{
         LocalDate desdeFecha = LocalDate.parse(desde, formatter);
         LocalDate hastaFecha = LocalDate.parse(hasta, formatter);
 
-        Map<String, Object> mensajeBody = new HashMap<>();
-
-        mensajeBody.put("success", Boolean.TRUE);
-        mensajeBody.put("mensaje", this.service.obtenerPeliculasDesdeFechaHastaFecha(desdeFecha, hastaFecha));
-
-        return ResponseEntity.ok(mensajeBody);
+        return ResponseEntity.ok(this.peliculaService.obtenerPeliculasDesdeFechaHastaFecha(desdeFecha, hastaFecha));
     }
 
     /**
@@ -93,9 +86,7 @@ public class PeliculaController{
     @GetMapping(path = "/calificacion")
     public ResponseEntity<?> getPeliculasEntreCalificaciones(@RequestParam(name = "desde", required = true) Integer desde,
                                                              @RequestParam(name = "hasta", required = true) Integer hasta) {
-
-        return Respuesta.generar(Boolean.TRUE,
-                this.service.obtenerPeliculasDesdeCalificacionHastaCalificacion(desde, hasta));
+        return ResponseEntity.ok(this.peliculaService.obtenerPeliculasDesdeCalificacionHastaCalificacion(desde, hasta));
     }
 
     //----------------------------------- METODOS POST ----------------------------------------------------
@@ -108,13 +99,15 @@ public class PeliculaController{
     @PostMapping()
     public ResponseEntity<?> crearPelicula(@RequestBody Pelicula pelicula) {
 
-        Pelicula nuevaPelicula = this.service.createPelicula(pelicula);
-        if(nuevaPelicula == null) {
-            return  Respuesta.generar(Boolean.FALSE, "Ya existe una pelicula con ese nombre");
+        if(pelicula.getTitulo() == null) {
+            return ResponseEntity.badRequest().body("La pelicula debe tener titulo");
         }
 
-        return Respuesta.generar(HttpStatus.CREATED, Boolean.TRUE,
-                String.format("Id: %s", nuevaPelicula.getId()));
+        try {
+            return new ResponseEntity<>(this.peliculaService.createPelicula(pelicula), HttpStatus.CREATED);
+        } catch (RuntimeException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     //----------------------------------- METODOS PUT ----------------------------------------------------
@@ -129,11 +122,15 @@ public class PeliculaController{
     public ResponseEntity<?> updatePelicula(@PathVariable(name = "id", required = true) Long id,
                                             @RequestBody Pelicula pelicula) {
 
-        Pelicula peliculaActualizada = this.service.updatePelicula(id, pelicula);
-        if(peliculaActualizada == null) {
-            return Respuesta.generar(Boolean.FALSE, "No se pudo actualizar los datos de la pelicula");
+        if(pelicula.getTitulo() == null || pelicula.getTitulo().equals("")) {
+            return ResponseEntity.badRequest().body("La pelicula debe tener titulo");
         }
 
-        return Respuesta.generar(HttpStatus.ACCEPTED, Boolean.TRUE, peliculaActualizada);
+        Optional<Pelicula> optionalPelicula = this.peliculaService.buscarPorId(id);
+        if(!optionalPelicula.isPresent()) {
+            return ResponseEntity.badRequest().body(String.format("No existe una pelicula con el id %d", id));
+        }
+
+        return ResponseEntity.ok(this.peliculaService.updatePelicula(id, pelicula));
     }
 }

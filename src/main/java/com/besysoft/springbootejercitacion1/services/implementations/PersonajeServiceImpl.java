@@ -1,15 +1,15 @@
 package com.besysoft.springbootejercitacion1.services.implementations;
 
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
-import com.besysoft.springbootejercitacion1.repositories.PersonajeRepository;
+import com.besysoft.springbootejercitacion1.repositories.memory.PersonajeRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.PersonajeService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
+@ConditionalOnProperty(prefix = "app", name = "type-bean", havingValue = "memory")
 public class PersonajeServiceImpl implements PersonajeService {
 
     private final PersonajeRepository repository;

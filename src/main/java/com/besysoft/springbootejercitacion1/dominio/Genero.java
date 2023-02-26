@@ -1,13 +1,22 @@
 package com.besysoft.springbootejercitacion1.dominio;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Entity
+@Table(name = "generos")
 public class Genero {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "nombre", unique = true, nullable = false)
     private String nombre;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "genero_id", referencedColumnName = "id")
     private List<Pelicula> peliculas = new ArrayList<>();
 
     public Genero() {
