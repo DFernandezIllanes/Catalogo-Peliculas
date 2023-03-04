@@ -9,15 +9,15 @@ import java.util.List;
 public class DatosDummyPersonaje {
 
     public static Personaje getPersonajeUno() {
-        return new Personaje(null, "Personaje Uno", 33, 80.0, "Caballero Jedi");
+        return new Personaje(null, "Personaje Uno", 33, 100.0, "Empleado nuclear");
     }
 
     public static Personaje getPersonajeDos() {
-        return new Personaje(null, "Personaje Dos", 40, 80.0, "Arqueologo");
+        return new Personaje(null, "Personaje Dos", 22, 75.0, "Velocista");
     }
 
     public static Personaje getPersonajeTres() {
-        return new Personaje(null, "Personaje Tres", 15, 100.0, "Rey de la selva");
+        return new Personaje(null, "Personaje Tres", 40, 82.0, "Ex asesino");
     }
 
     public static List<Personaje> getPersonajes() {

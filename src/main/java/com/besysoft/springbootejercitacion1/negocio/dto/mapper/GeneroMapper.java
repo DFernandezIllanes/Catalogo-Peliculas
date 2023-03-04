@@ -1,7 +1,9 @@
 package com.besysoft.springbootejercitacion1.negocio.dto.mapper;
 
 import com.besysoft.springbootejercitacion1.dominio.Genero;
+import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import com.besysoft.springbootejercitacion1.negocio.dto.GeneroDTO;
+import com.besysoft.springbootejercitacion1.negocio.dto.GeneroDetailsDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,5 +34,18 @@ public class GeneroMapper {
                 .stream()
                 .map(GeneroMapper::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    public static GeneroDetailsDTO mapToDetailsDto(Genero entity) {
+        GeneroDetailsDTO dto = new GeneroDetailsDTO();
+        dto.setId(entity.getId());
+        dto.setNombre(entity.getNombre());
+        dto.setListaPeliculas(entity
+                .getPeliculas()
+                .stream()
+                .map(Pelicula::getTitulo)
+                .collect(Collectors.toList())
+        );
+        return dto;
     }
 }

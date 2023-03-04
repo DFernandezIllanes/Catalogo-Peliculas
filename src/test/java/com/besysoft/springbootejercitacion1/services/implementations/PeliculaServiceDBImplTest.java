@@ -1,9 +1,13 @@
 package com.besysoft.springbootejercitacion1.services.implementations;
 
 import com.besysoft.springbootejercitacion1.datos.DatosDummyPelicula;
+import com.besysoft.springbootejercitacion1.datos.DatosDummyPersonaje;
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
+import com.besysoft.springbootejercitacion1.dominio.Personaje;
 import com.besysoft.springbootejercitacion1.repositories.database.PeliculaRepository;
+import com.besysoft.springbootejercitacion1.repositories.database.PersonajeRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.PeliculaService;
+import com.besysoft.springbootejercitacion1.services.interfaces.PersonajeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,8 +32,12 @@ class PeliculaServiceDBImplTest {
 
     @MockBean
     private PeliculaRepository repository;
+    @MockBean
+    private PersonajeRepository personajeRepository;
     @Autowired
     private PeliculaService service;
+    @Autowired
+    private PersonajeService personajeService;
 
     @BeforeEach
     void setUp() {
@@ -40,7 +48,7 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PeliculaService] - Alta de Pelicula")
+    @DisplayName("[Pelicula Service] - Creacion de Pelicula")
     void createPelicula() {
         //GIVEN
         Pelicula pelicula = DatosDummyPelicula.getPeliculaUno();
@@ -59,7 +67,7 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PeliculaService] - Buscar por ID")
+    @DisplayName("[Pelicula Service] - Buscar Pelicula por ID")
     void buscarPorId() {
         //GIVEN
         Pelicula pelicula = DatosDummyPelicula.getPeliculas().get(2);
@@ -78,6 +86,7 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Service] - Buscar Pelicula por Titulo")
     void buscarPorTitulo() {
         //GIVEN
         Pelicula pelicula = DatosDummyPelicula.getPeliculas().get(0);
@@ -104,6 +113,7 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Service] - Buscar todas las Peliculas")
     void obtenerTodos() {
         //GIVEN
         when(repository.findAll())
@@ -122,10 +132,14 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Service] - Actualizar Pelicula por ID")
     void updatePelicula() {
         //GIVEN
         Pelicula peliculaIngresada = DatosDummyPelicula.getPeliculaUno();
         Pelicula peliculaEsperada = DatosDummyPelicula.getPeliculas().get(0);
+
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyPelicula.getPeliculas().get(0)));
 
         //WHEN
         service.updatePelicula(1L, peliculaIngresada);
@@ -147,6 +161,7 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Service] - Buscar todas las Peliculas dentro de Intervalo de Fecha")
     void obtenerPeliculasDesdeFechaHastaFecha() {
         //GIVEN
         LocalDate desde = LocalDate.of(1975,1,1), hasta = LocalDate.of(2010,1,1);
@@ -175,6 +190,7 @@ class PeliculaServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Service] - Buscar todas las Peliculas dentro de Intervalo de Calificacion")
     void obtenerPeliculasDesdeCalificacionHastaCalificacion() {
         //GIVEN
         Integer desde = 2, hasta = 5;
@@ -200,5 +216,33 @@ class PeliculaServiceDBImplTest {
                                 DatosDummyPelicula.getPeliculas().get(2)
                         )
                 );
+    }
+
+    @Test
+    @DisplayName("[Pelicula Service] - Dentro de una Pelicula, agregar Personaje")
+    void agregarPersonaje() {
+        //GIVEN
+        Pelicula peliculaDePrueba = DatosDummyPelicula.getPeliculas().get(0);
+        Personaje personaje = DatosDummyPersonaje.getPersonajes().get(0);
+
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyPelicula.getPeliculas().get(0)));
+        when(personajeRepository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyPersonaje.getPersonajes().get(0)));
+
+        //WHEN
+        service.agregarPersonaje(1L, personaje.getId());
+
+        //THEN
+        ArgumentCaptor<Pelicula> peliculaArgumentCaptor = ArgumentCaptor.forClass(Pelicula.class);
+
+        verify(repository).save(peliculaArgumentCaptor.capture());
+        Pelicula peliculaCaptor = peliculaArgumentCaptor.getValue();
+
+        assertThat(peliculaCaptor.getPersonajes())
+                .isNotEqualTo(peliculaDePrueba.getPersonajes());
+
+        assertThat(peliculaCaptor.getPersonajes().size())
+                .isGreaterThan(0);
     }
 }

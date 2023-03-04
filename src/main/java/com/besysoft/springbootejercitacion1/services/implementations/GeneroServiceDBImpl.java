@@ -2,9 +2,12 @@ package com.besysoft.springbootejercitacion1.services.implementations;
 
 import com.besysoft.springbootejercitacion1.dominio.Genero;
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
+import com.besysoft.springbootejercitacion1.excepciones.EntityAdded.PeliculaAddedException;
 import com.besysoft.springbootejercitacion1.excepciones.EntityExist.GeneroExistException;
 import com.besysoft.springbootejercitacion1.excepciones.EntityNotFound.GeneroNotFoundException;
+import com.besysoft.springbootejercitacion1.excepciones.EntityNotFound.PeliculaNotFoundException;
 import com.besysoft.springbootejercitacion1.repositories.database.GeneroRepository;
+import com.besysoft.springbootejercitacion1.repositories.database.PeliculaRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.GeneroService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -17,9 +20,11 @@ import java.util.Optional;
 public class GeneroServiceDBImpl implements GeneroService {
 
     private final GeneroRepository generoRepository;
+    private final PeliculaRepository peliculaRepository;
 
-    public GeneroServiceDBImpl(GeneroRepository generoRepository) {
+    public GeneroServiceDBImpl(GeneroRepository generoRepository, PeliculaRepository peliculaRepository) {
         this.generoRepository = generoRepository;
+        this.peliculaRepository = peliculaRepository;
     }
 
     @Override
@@ -70,27 +75,37 @@ public class GeneroServiceDBImpl implements GeneroService {
 
     @Override
     @Transactional(readOnly = false)
-    public Genero agregarPelicula(Long id, Pelicula pelicula) {
+    public Genero agregarPelicula(Long idGenero, Long idPelicula) {
 
-        Optional<Genero> optionalGenero = generoRepository.findById(id);
+        Optional<Genero> optionalGenero = generoRepository.findById(idGenero);
         if(!optionalGenero.isPresent()) {
-            throw new RuntimeException("No existe el genero");
+            throw new GeneroNotFoundException(String.format("No existe un genero con id %d", idGenero),
+                    new RuntimeException("Causa Original")
+            );
+        }
+
+        Optional<Pelicula> optionalPelicula = peliculaRepository.findById(idPelicula);
+        if(!optionalPelicula.isPresent()) {
+            throw new PeliculaNotFoundException(String.format("No existe una pelicula con el id %d", idPelicula),
+                    new RuntimeException("Causa Original")
+            );
         }
 
         Genero genero = optionalGenero.get();
+        Pelicula pelicula = optionalPelicula.get();
 
-        Optional<Pelicula> optionalPelicula = genero
-                .getPeliculas()
+        Optional<Pelicula> optionalPeliculaListada = genero.getPeliculas()
                 .stream()
-                .filter(p -> p.getTitulo() == pelicula.getTitulo())
+                .filter(p -> p.getTitulo().equalsIgnoreCase(pelicula.getTitulo()))
                 .findAny();
 
-        if(optionalPelicula.isPresent()) {
-            throw new RuntimeException("La pelicula ya pertenece al genero");
+        if(optionalPeliculaListada.isPresent()) {
+            throw new PeliculaAddedException(String.format("Ya pertenece al genero la pelicula con titulo %s", pelicula.getTitulo()),
+                    new RuntimeException("Causa Original")
+            );
         }
 
         genero.addPelicula(pelicula);
-
         return generoRepository.save(genero);
     }
 }

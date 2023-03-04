@@ -5,7 +5,9 @@ import com.besysoft.springbootejercitacion1.datos.DatosDummyPelicula;
 import com.besysoft.springbootejercitacion1.dominio.Genero;
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import com.besysoft.springbootejercitacion1.repositories.database.GeneroRepository;
+import com.besysoft.springbootejercitacion1.repositories.database.PeliculaRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.GeneroService;
+import com.besysoft.springbootejercitacion1.services.interfaces.PeliculaService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,8 +29,12 @@ class GeneroServiceDBImplTest {
 
     @MockBean
     private GeneroRepository repository;
+    @MockBean
+    private PeliculaRepository peliculaRepository;
     @Autowired
     private GeneroService service;
+    @Autowired
+    private PeliculaService peliculaService;
 
     @BeforeEach
     void setUp() {
@@ -39,7 +45,7 @@ class GeneroServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[GeneroService] - Alta de Genero")
+    @DisplayName("[Genero Service] - Creacion de Genero")
     void createGenero() {
         //GIVEN
         Genero genero = DatosDummyGenero.getGeneroUno();
@@ -58,7 +64,7 @@ class GeneroServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[GeneroService] - Buscar por ID")
+    @DisplayName("[Genero Service] - Buscar Genero por ID")
     void buscarPorId() {
         //GIVEN
         Genero genero = DatosDummyGenero.getGeneros().get(2);
@@ -76,6 +82,7 @@ class GeneroServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Genero Service] - Buscar Genero por Nombre")
     void buscarPorNombre() {
         //GIVEN
         Genero genero = DatosDummyGenero.getGeneros().get(0);
@@ -99,7 +106,7 @@ class GeneroServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[GeneroService] - Buscar todos los Generos")
+    @DisplayName("[Genero Service] - Buscar todos los Generos")
     void obtenerTodos() {
         //GIVEN
         when(repository.findAll())
@@ -117,10 +124,14 @@ class GeneroServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Genero Service] - Actualizar Genero por ID")
     void updateGenero() {
         //GIVEN
         Genero generoIngresado = DatosDummyGenero.getGeneroUno();
         Genero generoEsperado = DatosDummyGenero.getGeneros().get(0);
+
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyGenero.getGeneros().get(0)));
 
         //WHEN
         service.updateGenero(1L, generoIngresado);
@@ -142,15 +153,19 @@ class GeneroServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Genero Service] - Dentro de un Genero, agregar Pelicula")
     void agregarPelicula() {
         //GIVEN
         Genero generoDePrueba = DatosDummyGenero.getGeneros().get(0);
         Pelicula pelicula = DatosDummyPelicula.getPeliculas().get(0);
 
-        when(repository.findById(1L)).thenReturn(Optional.of(DatosDummyGenero.getGeneros().get(0)));
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyGenero.getGeneros().get(0)));
+        when(peliculaRepository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyPelicula.getPeliculas().get(0)));
 
         //WHEN
-        service.agregarPelicula(1L, pelicula);
+        service.agregarPelicula(1L, pelicula.getId());
 
         //THEN
         ArgumentCaptor<Genero> generoArgumentCaptor = ArgumentCaptor.forClass(Genero.class);
@@ -158,9 +173,11 @@ class GeneroServiceDBImplTest {
         verify(repository).save(generoArgumentCaptor.capture());
         Genero generoCaptor = generoArgumentCaptor.getValue();
 
-        assertThat(generoCaptor.getPeliculas()).isNotEqualTo(generoDePrueba.getPeliculas());
+        assertThat(generoCaptor.getPeliculas())
+                .isNotEqualTo(generoDePrueba.getPeliculas());
 
-        assertThat(generoCaptor.getPeliculas().size()).isGreaterThan(0);
+        assertThat(generoCaptor.getPeliculas().size())
+                .isGreaterThan(0);
 
     }
 }

@@ -4,6 +4,7 @@ import com.besysoft.springbootejercitacion1.datos.DatosDummyGenero;
 import com.besysoft.springbootejercitacion1.dominio.Genero;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -32,6 +33,7 @@ class GeneroRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Genero Repository] - Buscar Genero por Nombre")
     void findByNombre() {
         //GIVEN
         String test = "Genero Uno";

@@ -1,5 +1,6 @@
 package com.besysoft.springbootejercitacion1.controller.handlerException;
 
+import com.besysoft.springbootejercitacion1.excepciones.EntityAdded.EntityAddedException;
 import com.besysoft.springbootejercitacion1.excepciones.EntityExist.EntityExistException;
 import com.besysoft.springbootejercitacion1.excepciones.EntityNotFound.EntityNotFoundException;
 import com.besysoft.springbootejercitacion1.negocio.dto.response.ExceptionDTO;
@@ -40,6 +41,17 @@ public class ApiControllerAdvice {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDTO notFound(EntityNotFoundException ex) {
+        return new ExceptionDTO(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                null
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDTO added(EntityAddedException ex) {
         return new ExceptionDTO(
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),

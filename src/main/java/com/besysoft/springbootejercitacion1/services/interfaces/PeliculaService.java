@@ -12,6 +12,7 @@ public interface PeliculaService {
     Optional<Pelicula> buscarPorTitulo(String titulo);
     Iterable<Pelicula> obtenerTodos();
     Pelicula updatePelicula(Long id, Pelicula pelicula);
+    Pelicula agregarPersonaje(Long idPelicula, Long idPersonaje);
     Iterable<Pelicula> obtenerPeliculasDesdeFechaHastaFecha(LocalDate desde, LocalDate hasta);
     Iterable<Pelicula> obtenerPeliculasDesdeCalificacionHastaCalificacion(Integer desde, Integer hasta);
 }

@@ -12,5 +12,5 @@ public interface GeneroService {
     Optional<Genero> buscarPorNombre(String nombre);
     Iterable<Genero> obtenerTodos();
     Genero updateGenero(Long id, Genero newGenero);
-    Genero agregarPelicula(Long id, Pelicula pelicula);
+    Genero agregarPelicula(Long idGenero, Long idPelicula);
 }

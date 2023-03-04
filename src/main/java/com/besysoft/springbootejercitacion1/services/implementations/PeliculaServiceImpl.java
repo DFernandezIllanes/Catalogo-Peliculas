@@ -62,6 +62,11 @@ public class PeliculaServiceImpl implements PeliculaService {
     }
 
     @Override
+    public Pelicula agregarPersonaje(Long idPelicula, Long idPersonaje) {
+        return null;
+    }
+
+    @Override
     public Iterable<Pelicula> obtenerPeliculasDesdeFechaHastaFecha(LocalDate desde, LocalDate hasta) {
         return this.repository.obtenerPeliculasDesdeFechaHastaFecha(desde, hasta);
     }

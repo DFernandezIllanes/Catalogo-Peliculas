@@ -1,7 +1,9 @@
 package com.besysoft.springbootejercitacion1.negocio.dto.mapper;
 
+import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
 import com.besysoft.springbootejercitacion1.negocio.dto.PersonajeDTO;
+import com.besysoft.springbootejercitacion1.negocio.dto.PersonajeDetailsDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,5 +35,20 @@ public class PersonajeMapper {
                 .stream()
                 .map(PersonajeMapper::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    public static PersonajeDetailsDTO mapToDetailsDto(Personaje entity) {
+        PersonajeDetailsDTO dto = new PersonajeDetailsDTO();
+        dto.setId(entity.getId());
+        dto.setNombre(entity.getNombre());
+        dto.setPeso(entity.getPeso());
+        dto.setHistoria(entity.getHistoria());
+        dto.setListaPeliculas(entity
+                .getPeliculas()
+                .stream()
+                .map(Pelicula::getTitulo)
+                .collect(Collectors.toList())
+        );
+        return dto;
     }
 }

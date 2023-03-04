@@ -45,6 +45,18 @@ public class GeneroController{
         return ResponseEntity.ok(generoDTOList);
     }
 
+    @GetMapping("/{id}/peliculas")
+    @ApiOperation(value = "Consulta el Genero por ID, mostrando las Peliculas que pertenecen al mismo")
+    public ResponseEntity<?> getGeneroById(@PathVariable(name = "id", required = true) Long id) {
+        Optional<Genero> optionalGenero = this.generoService.buscarPorId(id);
+        if(!optionalGenero.isPresent()) {
+            return ResponseEntity.badRequest().body(String.format("No existe un Genero con id %d", id));
+        }
+
+        Genero genero = optionalGenero.get();
+        return ResponseEntity.ok(GeneroMapper.mapToDetailsDto(genero));
+    }
+
     //------------------------------------------ METODOS POST ----------------------------------------
 
     /**
@@ -77,5 +89,14 @@ public class GeneroController{
         Genero genero = GeneroMapper.mapToEntity(generoDTO);
         genero = this.generoService.updateGenero(id, genero);
         return ResponseEntity.ok(GeneroMapper.mapToDto(genero));
+    }
+
+    @PutMapping(path = "/{id}/peliculas")
+    @ApiOperation(value = "Permite agregar dentro de un Genero existente una Pelicula existente")
+    public ResponseEntity<?> addPelicula(@PathVariable(name = "id", required = true) Long idGenero,
+                                         @RequestBody Long idPelicula) {
+
+        Genero genero = this.generoService.agregarPelicula(idGenero, idPelicula);
+        return ResponseEntity.ok(GeneroMapper.mapToDetailsDto(genero));
     }
 }

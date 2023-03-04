@@ -38,7 +38,7 @@ class PersonajeServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PersonajeService] - Alta de Personaje")
+    @DisplayName("[Personaje Service] - Creacion de Personaje")
     void createPersonaje() {
         //GIVEN
         Personaje personaje = DatosDummyPersonaje.getPersonajeUno();
@@ -57,7 +57,7 @@ class PersonajeServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PersonajeService] - Buscar por ID")
+    @DisplayName("[Personaje Service] - Buscar Personaje por ID")
     void buscarPorId() {
         //GIVEN
         Long id = 1L;
@@ -79,7 +79,7 @@ class PersonajeServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PersonajeService] - Buscar por Nombre")
+    @DisplayName("[Personaje Service] - Buscar Personaje por Nombre")
     void buscarPorNombre() {
         //GIVEN
         int index = 1;
@@ -99,7 +99,7 @@ class PersonajeServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PersonajeService] - Buscar todos los Personajes")
+    @DisplayName("[Personaje Service] - Buscar todos los Personajes")
     void obtenerTodos() {
         //GIVEN
         when(repository.findAll())
@@ -117,24 +117,33 @@ class PersonajeServiceDBImplTest {
     }
 
     @Test
+    @DisplayName("[Personaje Service] - Actualizar Personaje por ID")
     void updatePersonaje() {
         //GIVEN
-        Personaje personajeConId = DatosDummyPersonaje.getPersonajeUno();
-        personajeConId.setId(1L);
+        Personaje personajeIngresado = DatosDummyPersonaje.getPersonajeUno();
+        Personaje personajeEsperado = DatosDummyPersonaje.getPersonajes().get(0);
 
-        when(repository.save(personajeConId)).thenReturn(personajeConId);
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(DatosDummyPersonaje.getPersonajes().get(0)));
 
         //WHEN
-        Personaje personaje = service.updatePersonaje(1L, DatosDummyPersonaje.getPersonajeUno());
+        service.updatePersonaje(1L, personajeIngresado);
 
         //THEN
-        assertThat(personaje).isEqualTo(personajeConId);
+        ArgumentCaptor<Personaje> personajeArgumentCaptor = ArgumentCaptor.forClass(Personaje.class);
 
-        assertThat(personaje.getId()).isNotNull();
+        verify(repository).save(personajeArgumentCaptor.capture());
+        Personaje personajeCaptor = personajeArgumentCaptor.getValue();
+
+        assertThat(personajeCaptor)
+                .isEqualTo(personajeEsperado);
+
+        assertThat(personajeCaptor.getId())
+                .isEqualTo(personajeEsperado.getId());
     }
 
     @Test
-    @DisplayName("[PersonajeService] - Buscar por Edad dentro del Intervalo")
+    @DisplayName("[Personaje Service] - Buscar todos los Personajes dentro de Intervalo de Edad")
     void obtenerPersonajesDesdeEdadHastaEdad() {
         //GIVEN
         Integer desde = 10, hasta = 40;
@@ -153,7 +162,7 @@ class PersonajeServiceDBImplTest {
     }
 
     @Test
-    @DisplayName("[PersonajeService] - Buscar todos los Personajes por Edad o Nombre")
+    @DisplayName("[Personaje Service] - Buscar todos los Personajes por Edad o Nombre")
     void obtenerPersonajesPorFiltro() {
         //GIVEN
         Personaje personaje = DatosDummyPersonaje.getPersonajes().get(2);

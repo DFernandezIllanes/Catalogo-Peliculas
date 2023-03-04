@@ -1,9 +1,13 @@
 package com.besysoft.springbootejercitacion1.services.implementations;
 
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
+import com.besysoft.springbootejercitacion1.dominio.Personaje;
+import com.besysoft.springbootejercitacion1.excepciones.EntityAdded.PersonajeAddedException;
 import com.besysoft.springbootejercitacion1.excepciones.EntityExist.PeliculaExistException;
 import com.besysoft.springbootejercitacion1.excepciones.EntityNotFound.PeliculaNotFoundException;
+import com.besysoft.springbootejercitacion1.excepciones.EntityNotFound.PersonajeNotFoundException;
 import com.besysoft.springbootejercitacion1.repositories.database.PeliculaRepository;
+import com.besysoft.springbootejercitacion1.repositories.database.PersonajeRepository;
 import com.besysoft.springbootejercitacion1.services.interfaces.PeliculaService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -17,9 +21,12 @@ import java.util.Optional;
 public class PeliculaServiceDBImpl implements PeliculaService {
 
     private final PeliculaRepository peliculaRepository;
+    private final PersonajeRepository personajeRepository;
 
-    public PeliculaServiceDBImpl(PeliculaRepository peliculaRepository) {
+    public PeliculaServiceDBImpl(PeliculaRepository peliculaRepository,
+                                 PersonajeRepository personajeRepository) {
         this.peliculaRepository = peliculaRepository;
+        this.personajeRepository = personajeRepository;
     }
 
     @Override
@@ -67,6 +74,42 @@ public class PeliculaServiceDBImpl implements PeliculaService {
         }
 
         pelicula.setId(id);
+        return this.peliculaRepository.save(pelicula);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public Pelicula agregarPersonaje(Long idPelicula, Long idPersonaje) {
+
+        Optional<Pelicula> optionalPelicula = this.peliculaRepository.findById(idPelicula);
+        if(!optionalPelicula.isPresent()) {
+            throw new PeliculaNotFoundException(String.format("No existe una pelicula con id %d", idPelicula),
+                    new RuntimeException("Causa Original")
+            );
+        }
+
+        Optional<Personaje> optionalPersonaje = this.personajeRepository.findById(idPersonaje);
+        if(!optionalPersonaje.isPresent()) {
+            throw new PersonajeNotFoundException(String.format("No existe un personaje con el id %d", idPersonaje),
+                    new RuntimeException("Causa Original")
+            );
+        }
+
+        Pelicula pelicula = optionalPelicula.get();
+        Personaje personaje = optionalPersonaje.get();
+
+        Optional<Personaje> optionalPersonajeListado = pelicula.getPersonajes()
+                .stream()
+                .filter(p -> p.getNombre().equalsIgnoreCase(personaje.getNombre()))
+                .findAny();
+
+        if(optionalPersonajeListado.isPresent()) {
+            throw new PersonajeAddedException(String.format("El personaje %s ya pertenece al elenco", personaje.getNombre()),
+                    new RuntimeException("Causa Original")
+            );
+        }
+
+        pelicula.addPersonaje(personaje);
         return this.peliculaRepository.save(pelicula);
     }
 

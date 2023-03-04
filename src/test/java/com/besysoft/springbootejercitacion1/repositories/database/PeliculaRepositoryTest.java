@@ -4,6 +4,7 @@ import com.besysoft.springbootejercitacion1.datos.DatosDummyPelicula;
 import com.besysoft.springbootejercitacion1.dominio.Pelicula;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -37,6 +38,7 @@ class PeliculaRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Repository] - Buscar Pelicula por Titulo")
     void findByTitulo() {
         //GIVEN
         String test = DatosDummyPelicula.getPeliculaUno().getTitulo();
@@ -53,6 +55,7 @@ class PeliculaRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Repository] - Buscar todas las Peliculas dentro de Intervalo de Fecha")
     void buscarDesdeFechaHastaFecha() {
         //GIVEN
         LocalDate desde = LocalDate.of(1900,1, 1);
@@ -70,6 +73,7 @@ class PeliculaRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Pelicula Repository] - Buscar todas las Peliculas dentro de Intervalo de Calificacion")
     void buscarDesdeCalificacionHastaCalificacion() {
         //GIVEN
         Integer desde = 1;

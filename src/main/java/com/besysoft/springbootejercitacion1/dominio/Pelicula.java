@@ -76,7 +76,7 @@ public class Pelicula {
     }
 
     public void setCalificacion(Integer calificacion) {
-        if(calificacion > 0 && calificacion <=5) {
+        /*if(calificacion > 0 && calificacion <=5) {
             this.calificacion = calificacion;
         } else {
             System.out.println("La calificacion debe estar entre 1 y 5");
@@ -85,7 +85,8 @@ public class Pelicula {
             } else {
                 this.calificacion = 5;
             }
-        }
+        }*/
+        this.calificacion = calificacion;
     }
 
     public List<Personaje> getPersonajes() {

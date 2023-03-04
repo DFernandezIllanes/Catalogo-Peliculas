@@ -4,6 +4,7 @@ import com.besysoft.springbootejercitacion1.datos.DatosDummyPersonaje;
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -33,6 +34,7 @@ class PersonajeRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Personaje Repository] - Buscar Personaje por Nombre")
     void findByNombre() {
         //GIVEN
         String test = "Personaje Uno";
@@ -49,6 +51,7 @@ class PersonajeRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Personaje Repository] - Buscar todos los Personajes por Nombre")
     void findAllByNombre() {
         //GIVEN
         String test = "Personaje Uno";
@@ -70,6 +73,7 @@ class PersonajeRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Personaje Repository] - Buscar todos los Personajes dentro de Intervalo de Edad")
     void buscarDesdeEdadHastaEdad() {
         //GIVEN
         Integer desde = 10, hasta = 30;
@@ -85,6 +89,7 @@ class PersonajeRepositoryTest {
     }
 
     @Test
+    @DisplayName("[Personaje Repository] - Buscar todos los Personajes por Edad")
     void findByEdad() {
         //GIVEN
         Integer edadBuscada = DatosDummyPersonaje.getPersonajeUno().getEdad();

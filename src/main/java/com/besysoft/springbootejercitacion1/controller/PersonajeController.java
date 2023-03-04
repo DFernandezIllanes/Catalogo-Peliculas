@@ -28,10 +28,6 @@ public class PersonajeController{
 
     //------------------------------------ METODOS GET --------------------------------------------------
 
-    /**
-     * Devuelve todos los personajes
-     * @return
-     */
     @GetMapping()
     @ApiOperation(value = "Consulta todos los Personajes disponibles en la BD")
     public ResponseEntity<?> getPersonajes() {
@@ -41,13 +37,19 @@ public class PersonajeController{
         return ResponseEntity.ok(personajeDTOList);
     }
 
-    /**
-     * Devuelve una lista de personajes que coincidan con el argumento pasado como filtro. Si el argumento pasado es un numero,
-     * devuelve todos los personajes cuya edad coincidan con dicho numero. Si el argumento no es un numero, devuelve todos los
-     * personajes cuyo nombre contengan el valor del argumento. Si no hay coincidencias, devuelve una lista vacia
-     * @param filtro
-     * @return
-     */
+    @GetMapping("/{id}/peliculas")
+    @ApiOperation(value = "Consulta el Personaje por ID, mostrando las Peliculas en las que aparece el mismo")
+    public ResponseEntity<?> getPersonajeById(@PathVariable(name = "id", required = true) Long id) {
+
+        Optional<Personaje> optionalPersonaje = this.personajeService.buscarPorId(id);
+        if(!optionalPersonaje.isPresent()) {
+            return ResponseEntity.badRequest().body(String.format("No existe un Personaje con id %d", id));
+        }
+
+        Personaje personaje = optionalPersonaje.get();
+        return ResponseEntity.ok(PersonajeMapper.mapToDetailsDto(personaje));
+    }
+
     @GetMapping(path = "/{filtro}")
     @ApiOperation(value = "Consulta los Personajes disponibles en la BD que coincidan con el filtro ingresado. " +
             "Si el filtro es un valor numerico, se realizada una busqueda por edad. Sino, devuelve todos los personajes " +
@@ -59,12 +61,6 @@ public class PersonajeController{
         return ResponseEntity.ok(personajeDTOList);
     }
 
-    /**
-     * Devuelve todos los personajes cuya edad se encuentren dentro del intervalo indicado por los parametros
-     * @param desde
-     * @param hasta
-     * @return
-     */
     @GetMapping("/edad")
     @ApiOperation(value = "Consulta todos los Personajes disponibles en la BD que pertenezcan al intervalo de edad ingresado")
     public ResponseEntity<?> getPersonajesEntreEdades(@RequestParam(name = "desde", required = true) Integer desde,
@@ -76,11 +72,6 @@ public class PersonajeController{
 
     //------------------------------------ METODOS POST --------------------------------------------------
 
-    /**
-     * Agrega un personaje a la coleccion de personajes
-     * @param personajeDTO
-     * @return
-     */
     @PostMapping()
     @ApiOperation(value = "Permite la creacion de un Personaje")
     public ResponseEntity<?> createPersonaje(@Valid @RequestBody PersonajeDTO personajeDTO) {
@@ -107,5 +98,4 @@ public class PersonajeController{
         personaje = this.personajeService.updatePersonaje(id, personaje);
         return ResponseEntity.ok(PersonajeMapper.mapToDto(personaje));
     }
-
 }
