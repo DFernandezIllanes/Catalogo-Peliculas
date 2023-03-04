@@ -1,15 +1,27 @@
 package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Genero;
+import com.besysoft.springbootejercitacion1.dominio.Pelicula;
+import com.besysoft.springbootejercitacion1.negocio.dto.GeneroDTO;
+import com.besysoft.springbootejercitacion1.negocio.dto.PeliculaDTO;
+import com.besysoft.springbootejercitacion1.negocio.dto.mapper.GeneroMapper;
+import com.besysoft.springbootejercitacion1.negocio.dto.mapper.PeliculaMapper;
 import com.besysoft.springbootejercitacion1.services.interfaces.GeneroService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/generos")
+@Slf4j
+@Api(value = "Genero Controller", tags = "Acciones permitidas para la entidad Genero")
 public class GeneroController{
 
     private final GeneroService generoService;
@@ -25,30 +37,28 @@ public class GeneroController{
      * @return
      */
     @GetMapping()
+    @ApiOperation(value = "Consulta todos los Generos disponibles en la BD")
     public ResponseEntity<?> getGeneros() {
-        return ResponseEntity.ok(this.generoService.obtenerTodos());
+
+        List<Genero> generoList = (List<Genero>) this.generoService.obtenerTodos();
+        List<GeneroDTO> generoDTOList = GeneroMapper.mapListToDto(generoList);
+        return ResponseEntity.ok(generoDTOList);
     }
 
     //------------------------------------------ METODOS POST ----------------------------------------
 
     /**
      * Agrega un genero a la coleccion de generos
-     * @param genero
+     * @param generoDTO
      * @return
      */
     @PostMapping()
-    public ResponseEntity<?> createGenero(@RequestBody Genero genero) {
+    @ApiOperation(value = "Permite la creacion de un Genero")
+    public ResponseEntity<?> createGenero(@Valid @RequestBody GeneroDTO generoDTO) {
 
-        if(genero.getNombre() == null) {
-            return ResponseEntity.badRequest().body("El genero debe tener nombre");
-        }
-
-        Optional<Genero> optionalGenero = this.generoService.buscarPorNombre(genero.getNombre());
-        if(optionalGenero.isPresent()) {
-            return new ResponseEntity<>("Ya existe un genero con el mismo nombre", HttpStatus.CONFLICT);
-        }
-
-        return ResponseEntity.ok(this.generoService.createGenero(genero));
+        Genero genero = GeneroMapper.mapToEntity(generoDTO);
+        genero = this.generoService.createGenero(genero);
+        return ResponseEntity.ok(GeneroMapper.mapToDto(genero));
     }
 
     //------------------------------------------ METODOS PUT ----------------------------------------
@@ -56,18 +66,16 @@ public class GeneroController{
     /**
      * Actualiza los datos del genero que coincida con el ID indicado
      * @param id
-     * @param genero
+     * @param generoDTO
      * @return
      */
     @PutMapping(path = "/{id}")
+    @ApiOperation(value = "Permite actualizar datos de un Genero existente en la BD")
     public ResponseEntity<?> updateGenero(@PathVariable(name = "id", required = true) Long id,
-                                          @RequestBody Genero genero) {
+                                          @Valid @RequestBody GeneroDTO generoDTO) {
 
-        Optional<Genero> oGenero = this.generoService.buscarPorId(id);
-
-        if(!oGenero.isPresent()) {
-            return ResponseEntity.badRequest().body(String.format("No existe un genero con el id %d", id));
-        }
-        return ResponseEntity.ok(this.generoService.updateGenero(id, genero));
+        Genero genero = GeneroMapper.mapToEntity(generoDTO);
+        genero = this.generoService.updateGenero(id, genero);
+        return ResponseEntity.ok(GeneroMapper.mapToDto(genero));
     }
 }

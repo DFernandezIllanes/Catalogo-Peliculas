@@ -10,6 +10,11 @@ public interface PersonajeRepository extends JpaRepository<Personaje, Long> {
 
     Optional<Personaje> findByNombre(String nombre);
 
+    @Query("SELECT p FROM Personaje p WHERE p.nombre LIKE CONCAT('%', :nombre, '%')")
+    Iterable<Personaje> findAllByNombre(String nombre);
+
     @Query("SELECT p FROM Personaje p WHERE p.edad BETWEEN :desde AND :hasta")
     Iterable<Personaje> buscarDesdeEdadHastaEdad(Integer desde, Integer hasta);
+
+    Iterable<Personaje> findByEdad(Integer edad);
 }

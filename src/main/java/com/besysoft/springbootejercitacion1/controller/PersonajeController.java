@@ -1,12 +1,23 @@
 package com.besysoft.springbootejercitacion1.controller;
 
 import com.besysoft.springbootejercitacion1.dominio.Personaje;
+import com.besysoft.springbootejercitacion1.negocio.dto.PersonajeDTO;
+import com.besysoft.springbootejercitacion1.negocio.dto.mapper.PersonajeMapper;
 import com.besysoft.springbootejercitacion1.services.interfaces.PersonajeService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/personajes")
+@Slf4j
+@Api(value = "Personaje Controller", tags = "Acciones permitidas para la entidad Personaje")
 public class PersonajeController{
 
     private final PersonajeService personajeService;
@@ -22,8 +33,12 @@ public class PersonajeController{
      * @return
      */
     @GetMapping()
+    @ApiOperation(value = "Consulta todos los Personajes disponibles en la BD")
     public ResponseEntity<?> getPersonajes() {
-        return ResponseEntity.ok(this.personajeService.obtenerTodos());
+
+        List<Personaje> personajes = (List<Personaje>) this.personajeService.obtenerTodos();
+        List<PersonajeDTO> personajeDTOList = PersonajeMapper.mapListToDto(personajes);
+        return ResponseEntity.ok(personajeDTOList);
     }
 
     /**
@@ -34,8 +49,14 @@ public class PersonajeController{
      * @return
      */
     @GetMapping(path = "/{filtro}")
+    @ApiOperation(value = "Consulta los Personajes disponibles en la BD que coincidan con el filtro ingresado. " +
+            "Si el filtro es un valor numerico, se realizada una busqueda por edad. Sino, devuelve todos los personajes " +
+            "cuyo nombre coincidan con el valor del filtro")
     public ResponseEntity<?> getPersonajesPorFiltro(@PathVariable String filtro) {
-        return ResponseEntity.ok(this.personajeService.obtenerPersonajesPorFiltro(filtro));
+
+        List<Personaje> personajes = (List<Personaje>) this.personajeService.obtenerPersonajesPorFiltro(filtro);
+        List<PersonajeDTO> personajeDTOList = PersonajeMapper.mapListToDto(personajes);
+        return ResponseEntity.ok(personajeDTOList);
     }
 
     /**
@@ -45,26 +66,28 @@ public class PersonajeController{
      * @return
      */
     @GetMapping("/edad")
+    @ApiOperation(value = "Consulta todos los Personajes disponibles en la BD que pertenezcan al intervalo de edad ingresado")
     public ResponseEntity<?> getPersonajesEntreEdades(@RequestParam(name = "desde", required = true) Integer desde,
                                                       @RequestParam(name = "hasta", required = true) Integer hasta) {
-        return ResponseEntity.ok(this.personajeService.obtenerPersonajesDesdeEdadHastaEdad(desde, hasta));
+        List<Personaje> personajes = (List<Personaje>) this.personajeService.obtenerPersonajesDesdeEdadHastaEdad(desde, hasta);
+        List<PersonajeDTO> personajeDTOList = PersonajeMapper.mapListToDto(personajes);
+        return ResponseEntity.ok(personajeDTOList);
     }
 
     //------------------------------------ METODOS POST --------------------------------------------------
 
     /**
      * Agrega un personaje a la coleccion de personajes
-     * @param personaje
+     * @param personajeDTO
      * @return
      */
     @PostMapping()
-    public ResponseEntity<?> createPersonaje(@RequestBody Personaje personaje) {
+    @ApiOperation(value = "Permite la creacion de un Personaje")
+    public ResponseEntity<?> createPersonaje(@Valid @RequestBody PersonajeDTO personajeDTO) {
 
-        if(personaje.getNombre() == null) {
-            return ResponseEntity.badRequest().body("El personaje debe tener un nombre");
-        }
-
-        return ResponseEntity.ok(this.personajeService.createPersonaje(personaje));
+        Personaje personaje = PersonajeMapper.mapToEntity(personajeDTO);
+        personaje = this.personajeService.createPersonaje(personaje);
+        return ResponseEntity.ok(PersonajeMapper.mapToDto(personaje));
     }
 
     //------------------------------------ METODOS PUT --------------------------------------------------
@@ -72,18 +95,17 @@ public class PersonajeController{
     /**
      * Actualiza los datos del personaje que coincida con el ID pasado
      * @param id
-     * @param personaje
+     * @param personajeDTO
      * @return
      */
     @PutMapping(path = "/{id}")
+    @ApiOperation(value = "Permite actualizar datos de un Personaje existente en la BD")
     public ResponseEntity<?> updatePersonaje(@PathVariable(name = "id", required = true) Long id,
-                                             @RequestBody Personaje personaje) {
+                                             @Valid @RequestBody PersonajeDTO personajeDTO) {
 
-        if(personaje.getNombre() == null) {
-            return ResponseEntity.badRequest().body("El personaje debe tener nombre");
-        }
-
-        return ResponseEntity.ok(this.personajeService.updatePersonaje(id, personaje));
+        Personaje personaje = PersonajeMapper.mapToEntity(personajeDTO);
+        personaje = this.personajeService.updatePersonaje(id, personaje);
+        return ResponseEntity.ok(PersonajeMapper.mapToDto(personaje));
     }
 
 }
